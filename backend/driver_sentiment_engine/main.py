@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
 from . import models, database, queue, worker, auth
-from .services import FeedbackProcessor, RuleBasedAnalyzer, AlertingService
+from .services import FeedbackProcessor, RuleBasedAnalyzer, AlertingService, AISentimentAnalyzer
 from datetime import timedelta
 from typing import List, Dict
 
@@ -13,11 +13,12 @@ app_state = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    analyzer = RuleBasedAnalyzer()
+    # analyzer = RuleBasedAnalyzer()
+    analyzer = AISentimentAnalyzer()
     alerter = AlertingService()
     processor = FeedbackProcessor(analyzer=analyzer, alerter=alerter)
     app_state['feedback_processor'] = processor
-    print("FastAPI server starting up...")
+    print("FastAPI server starting up with AI Engine...")
     print("NOTE: Make sure your MongoDB and Redis servers are running.")
     print("NOTE: Run the RQ worker in a separate terminal.")
     print("INFO:     Application startup complete.")

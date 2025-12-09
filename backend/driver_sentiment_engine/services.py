@@ -1,6 +1,34 @@
 from .models import GenericFeedbackSubmission, EntityType
 from . import database
 import datetime
+from transformers import pipeline
+
+
+class AISentimentAnalyzer:
+
+    def __init__(self):
+        print("Loading AI Brain (DISTILBERT)... This runs once at startup")
+
+        self.pipeline = pipeline(
+            "sentiment-analysis",
+            model="distilbert-base-uncased-finetuned-sst-2-english",
+              device = -1)
+
+    def analyze(self, text: str) -> float:
+        safe_text = text[:512]
+        result = self.pipeline(safe_text)[0]
+        label = result['label']
+        confidence = result['score']
+
+        if label == 'POSITIVE':
+            final_score = 3.0 + (2.0 * confidence)
+        else:
+            final_score = 3.0 - (2.0 * confidence)
+
+        final_score = max(1.0, min(5.0, final_score))
+
+        print(f"AI Analysis: '{safe_text[:30]}...' -> {label} ({confidence:.2f}) -> Stars: {final_score: .2f}")
+        return final_score
 
 
 # Sentiment Analyzer
